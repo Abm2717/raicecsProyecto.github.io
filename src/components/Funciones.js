@@ -133,7 +133,6 @@ export function newtonRaphson(f, df, xi, eamax) {
         return { mensaje: "La derivada es cero en el punto inicial." };
     }
 
-    // Registro la fila inicial (ea = 100 por convención)
     valoresTabla.push({
         xi: parseFloat(xi.toFixed(6)),
         fxi: parseFloat(fxi.toFixed(6)),
@@ -144,18 +143,16 @@ export function newtonRaphson(f, df, xi, eamax) {
     let iteraciones = 0;
 
     while (iteraciones < 100) {
-        // calculo la siguiente aproximación
         const xi2 = xi - (fxi / dfxi);
         const fxi2 = f(xi2);
         const dfxi2 = df(xi2);
 
         iteraciones++;
 
-        // calculo error relativo con protección contra división por cero
-        const denom = Math.abs(xi2) > 1e-12 ? xi2 : xi; // si xi2 == 0 usa xi
+    
+        const denom = Math.abs(xi2) > 1e-12 ? xi2 : xi; 
         const error = (iteraciones === 1) ? 100 : Math.abs((xi2 - xi) / denom) * 100;
 
-        // ahora guardo la fila correspondiente a la nueva aproximación xi2
         valoresTabla.push({
             xi: parseFloat(xi2.toFixed(6)),
             fxi: parseFloat(fxi2.toFixed(6)),
@@ -163,7 +160,6 @@ export function newtonRaphson(f, df, xi, eamax) {
             ea: parseFloat(error.toFixed(6))
         });
 
-        // criterio de parada
         if (error < eamax) {
             return {
                 raiz: parseFloat(xi2.toFixed(6)),
@@ -174,7 +170,6 @@ export function newtonRaphson(f, df, xi, eamax) {
             };
         }
 
-        // preparo la siguiente iteración
         xi = xi2;
         fxi = fxi2;
         dfxi = dfxi2;

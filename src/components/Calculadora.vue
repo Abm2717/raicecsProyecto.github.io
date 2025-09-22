@@ -4,8 +4,8 @@ import { ref } from 'vue'
 
 const limiteInferior = ref(0)
 const limiteSuperior = ref(1)
-const valorX0 = ref(0) // Para Newton-Raphson
-const valorX1 = ref(1) // Para método de la secante
+const valorX0 = ref(0) 
+const valorX1 = ref(1) 
 const errorMax = ref(0.001)
 const funcionSeleccionada = ref('ninguno')
 const metodoSeleccionado = ref('ninguno')
@@ -14,7 +14,8 @@ const msjAlerta = ref('')
 const resultados = ref(null)
 const comparacion = ref(null)
 
-// Funciones predefinidas con sus derivadas
+
+//Funciones y sus derivadas
 const funciones = {
   f: {
     f: x => (4*x**3) - (6*x**2) + (7*x) - 2.3,
@@ -53,9 +54,9 @@ const funciones = {
   }
 }
 
-
+//Valores de cada seleccion de funcion
 const opcionesFunciones = [
-  { value: 'ninguno', label: 'Selecciona función' },
+  { value: 'ninguno', label: 'Selecciona funcion' },
   { value: 'f', label: funciones.f.label },
   { value: 'g', label: funciones.g.label },
   { value: 'h', label: funciones.h.label },
@@ -65,22 +66,22 @@ const opcionesFunciones = [
   { value: 'l', label: funciones.l.label }
 ]
 
+//Valores de cada seleccion de metodo
 const opcionesMetodos = [
   { value: 'ninguno', label: 'Selecciona metodo' },
-  { value: 'biseccion', label: 'Método de Bisección' },
+  { value: 'biseccion', label: 'Metodo de Biseccion' },
   { value: 'reglaFalsa', label: 'Metodo de Regla Falsa' },
-  { value: 'newtonRaphson', label: 'Método de Newton-Raphson' },
-  { value: 'secante', label: 'Método de la Secante' }
+  { value: 'newtonRaphson', label: 'Metodo de Newton-Raphson' },
+  { value: 'secante', label: 'Metodo de la Secante' }
 ]
-  
-// Computed para determinar qué inputs mostrar
+
+
 const esMetodoIntervalo = ref(false)
 const esNewtonRaphson = ref(false)
 const esSecante = ref(false)
 
-// Watchers para actualizar los inputs según el método
 import { watch } from 'vue'
-
+//Para mostrarinputs
 watch(metodoSeleccionado, (nuevoMetodo) => {
   esMetodoIntervalo.value = ['biseccion', 'reglaFalsa'].includes(nuevoMetodo)
   esNewtonRaphson.value = nuevoMetodo === 'newtonRaphson'
@@ -121,7 +122,7 @@ function cerrarAlerta() {
   mostrarAlerta.value = false
 }
 
-// Función para obtener las columnas de la tabla según el método
+// Encabezados de columas de cada metodo
 function obtenerColumnas() {
   switch(metodoSeleccionado.value) {
     case 'biseccion':
@@ -137,6 +138,7 @@ function obtenerColumnas() {
   }
 }
 
+//Para obtener las raices
 function obtenerRaices() {
   mostrarAlerta.value = false
   if (!validarInputs()) {
@@ -147,18 +149,16 @@ function obtenerRaices() {
 
   const funcionObj = funciones[funcionSeleccionada.value]
   if (!funcionObj) {
-    msjAlerta.value = 'Función no encontrada'
+    msjAlerta.value = 'Funcion no encontrada'
     mostrarAlerta.value = true
     return
   }
-
-  // Validaciones específicas por método
   if (esMetodoIntervalo.value) {
     const fa = funcionObj.f(limiteInferior.value)
     const fb = funcionObj.f(limiteSuperior.value)
     
     if (fa * fb > 0) {
-      msjAlerta.value = 'Los valores de la función en los límites deben tener signos opuestos para garantizar una raíz'
+      msjAlerta.value = 'Los valores de la funcion en los limites deben tener signos opuestos para garantizar una raiz'
       mostrarAlerta.value = true
       return
     }
@@ -167,7 +167,7 @@ function obtenerRaices() {
   try {
     let resultado
     const metodosLabels = {
-      biseccion: 'Bisección',
+      biseccion: 'Biseccion',
       reglaFalsa: 'Regla Falsa',
       newtonRaphson: 'Newton-Raphson',
       secante: 'Secante'
@@ -187,7 +187,7 @@ function obtenerRaices() {
         resultado = secante(funcionObj.f, valorX0.value, valorX1.value, errorMax.value)
         break
       default:
-        throw new Error('Método no implementado')
+        throw new Error('No se encontro metodo')
     }
     
     if (resultado.mensaje) {
@@ -204,14 +204,15 @@ function obtenerRaices() {
     }
     
   } catch (error) {
-    msjAlerta.value = 'Error al calcular la raíz: ' + error.message
+    msjAlerta.value = 'Error al calcular la raiz: ' + error.message
     mostrarAlerta.value = true
   }
 }
+
+//Compara todos los metodos
 function compararMetodos() {
   mostrarAlerta.value = false
   
-  // Usar la primera función (f) y valores predeterminados
   const funcionObj = funciones.f
   const xi = 0
   const xf = 1
@@ -221,17 +222,16 @@ function compararMetodos() {
   
   const resultados = []
   
-  // Validar intervalo para métodos que lo requieren
   const fa = funcionObj.f(xi)
   const fb = funcionObj.f(xf)
   
   try {
-    // Bisección
+    // Biseccion
     if (fa * fb <= 0) {
       const resBiseccion = biseccion(funcionObj.f, xi, xf, eamax)
       if (!resBiseccion.mensaje) {
         resultados.push({
-          metodo: 'Bisección',
+          metodo: 'Biseccion',
           iteraciones: resBiseccion.iteraciones,
           raiz: resBiseccion.raiz,
           f_raiz: resBiseccion.f_raiz,
@@ -254,7 +254,7 @@ function compararMetodos() {
       }
     }
     
-    // Newton-Raphson
+    // Newton
     const resNewton = newtonRaphson(funcionObj.f, funcionObj.df, x0, eamax)
     if (!resNewton.mensaje) {
       resultados.push({
@@ -284,7 +284,7 @@ function compararMetodos() {
     }
     
   } catch (error) {
-    msjAlerta.value = 'Error en la comparación: ' + error.message
+    msjAlerta.value = 'Error en la comparacion: ' + error.message
     mostrarAlerta.value = true
   }
 }
@@ -292,10 +292,10 @@ function compararMetodos() {
 
 <template>
   <div class="container">
-    <h1>Obtener Raíces de Funciones</h1>
-    <p>Ingresa los parámetros, selecciona la función, el método numérico y el error máximo para encontrar raíces.</p>
+    <h1>Obtener Raices de Funciones</h1>
+    <p>Ingresa los parametros, selecciona la funcion, el metodo numerico y el error maximo para encontrar raices.</p>
     
-    <!-- Alerta de error -->
+    <!-- Alerta -->
     <div v-if="mostrarAlerta" class="alerta">
       <div class="alerta-contenido">
         <span class="icono-alerta">⚠️</span>
@@ -307,7 +307,7 @@ function compararMetodos() {
     <div class="inputs">
       <div class="selectores">
         <label class="selector-funcion">
-          Función a analizar
+          Funcion a analizar
           <select v-model="funcionSeleccionada" class="select-funcion">
             <option v-for="opcion in opcionesFunciones" :key="opcion.value" :value="opcion.value">
               {{ opcion.label }}
@@ -316,7 +316,7 @@ function compararMetodos() {
         </label>
         
         <label class="selector-metodo">
-          Método numérico
+          Metodo numerico
           <select v-model="metodoSeleccionado" class="select-funcion">
             <option v-for="opcion in opcionesMetodos" :key="opcion.value" :value="opcion.value">
               {{ opcion.label }}
@@ -326,7 +326,7 @@ function compararMetodos() {
       </div>
       
       <div class="inputs-numericos">
-        <!-- Inputs para métodos de intervalo -->
+        <!-- Regla y biseccion -->
         <template v-if="esMetodoIntervalo">
           <label>
             Valor de Xi
@@ -339,7 +339,7 @@ function compararMetodos() {
           </label>
         </template>
         
-        <!-- Input para Newton-Raphson -->
+        <!--Newton -->
         <template v-if="esNewtonRaphson">
           <label>
             Valor inicial X₀
@@ -347,7 +347,7 @@ function compararMetodos() {
           </label>
         </template>
         
-        <!-- Inputs para método de la secante -->
+        <!-- Secante -->
         <template v-if="esSecante">
           <label>
             Valor X₀
@@ -361,7 +361,7 @@ function compararMetodos() {
         </template>
         
         <label>
-          Error máximo
+          Error maximo
           <input type="number" v-model.number="errorMax" @keydown="bloquearTeclas" min="0.0001" step="0.0001" />
         </label>
       </div>
@@ -377,7 +377,7 @@ function compararMetodos() {
     <!-- Resultados -->
     <div v-if="resultados" class="resultados-wrapper">
       <div class="resultados-header">
-        <h2>Resultados del Análisis</h2>
+        <h2>Resultados del Analisis</h2>
         <div class="metodo-usado">
           <span class="metodo-badge">{{ resultados.metodo }}</span>
         </div>
@@ -386,13 +386,13 @@ function compararMetodos() {
       <div class="stats-grid">
         <div class="stat-item raiz">
           <span class="stat-icon"></span>
-          <span class="stat-label">Raíz encontrada</span>
+          <span class="stat-label">Raiz encontrada</span>
           <span class="stat-value">{{ resultados.raiz }}</span>
         </div>
         
         <div class="stat-item funcion">
           <span class="stat-icon"></span>
-          <span class="stat-label">f(raíz)</span>
+          <span class="stat-label">f(raiz)</span>
           <span class="stat-value">{{ resultados.f_raiz }}</span>
         </div>
         
@@ -410,7 +410,7 @@ function compararMetodos() {
       </div>
     </div>
     
-    <!-- Tabla de iteraciones adaptativa -->
+    <!-- Tabla -->
     <div v-if="resultados && resultados.tabla" class="tabla-iteraciones">
       <h3>Tabla de Iteraciones</h3>
       <div class="tabla-container">
@@ -422,7 +422,7 @@ function compararMetodos() {
           </thead>
           <tbody>
             <tr v-for="(fila, index) in resultados.tabla" :key="index">
-              <!-- Bisección -->
+              <!-- Tabla biseccion -->
               <template v-if="resultados.tipoMetodo === 'biseccion'">
                 <td>{{ fila.xi }}</td>
                 <td>{{ fila.xf }}</td>
@@ -433,7 +433,7 @@ function compararMetodos() {
                 <td>{{ fila.ea }}</td>
               </template>
               
-              <!-- Regla Falsa -->
+              <!-- Tabla regla  -->
               <template v-else-if="resultados.tipoMetodo === 'reglaFalsa'">
                 <td>{{ fila.xi }}</td>
                 <td>{{ fila.xf }}</td>
@@ -445,7 +445,7 @@ function compararMetodos() {
                 <td>{{ fila.ea }}</td>
               </template>
               
-              <!-- Newton-Raphson -->
+              <!-- Tabla newton -->
               <template v-else-if="resultados.tipoMetodo === 'newtonRaphson'">
                 <td>{{ fila.xi }}</td>
                 <td>{{ fila.fxi }}</td>
@@ -453,7 +453,7 @@ function compararMetodos() {
                 <td>{{ fila.ea }}</td>
               </template>
               
-              <!-- Secante -->
+              <!-- Tabla secante -->
               <template v-else-if="resultados.tipoMetodo === 'secante'">
                 <td>{{ fila.xi }}</td>
                 <td>{{ fila.xi1 }}</td>
@@ -467,18 +467,18 @@ function compararMetodos() {
         </table>
       </div>
     </div>
-    <!-- Tabla de comparación -->
+    <!-- Tabla comparacion -->
     <div v-if="comparacion" class="tabla-iteraciones">
-      <h3>Comparación de Métodos</h3>
-      <p class="funcion-comparacion">Función: {{ comparacion.funcion }}</p>
+      <h3>Comparacion de Metodos</h3>
+      <p class="funcion-comparacion">Funcion: {{ comparacion.funcion }}</p>
       <div class="tabla-container">
         <table>
           <thead>
             <tr>
-              <th>Método</th>
+              <th>Metodo</th>
               <th>Iteraciones</th>
-              <th>Raíz</th>
-              <th>Y(raíz)</th>
+              <th>Raiz</th>
+              <th>Y(raiz)</th>
               <th>Error aprox</th>
             </tr>
           </thead>
@@ -639,7 +639,6 @@ input:focus, .select-funcion:focus {
   cursor: pointer;
 }
 
-/* Quitar spinner de inputs numéricos */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
