@@ -124,8 +124,6 @@ export function reglaFalsa(f, xi, xf, eamax) {
 }
 
 export function newtonRaphson(f, df, xi, eamax) {
-    // Asegurarnos que existe la variable global valoresTabla (si no, la creamos)
-    if (typeof valoresTabla === 'undefined') valoresTabla = [];
     valoresTabla.length = 0;
 
     let fxi = f(xi);
@@ -135,7 +133,7 @@ export function newtonRaphson(f, df, xi, eamax) {
         return { mensaje: "La derivada es cero en el punto inicial." };
     }
 
-    // Empujamos la fila inicial (x0) con EA = 100 (convención)
+    // Registro la fila inicial (ea = 100 por convención)
     valoresTabla.push({
         xi: parseFloat(xi.toFixed(6)),
         fxi: parseFloat(fxi.toFixed(6)),
@@ -145,54 +143,50 @@ export function newtonRaphson(f, df, xi, eamax) {
 
     let iteraciones = 0;
 
-    while (true) {
-        const xr = xi - (fxi / dfxi);
-        const fxr = f(xr);
-        const dfxr = df(xr);
+    while (iteraciones < 100) {
+        // calculo la siguiente aproximación
+        const xi2 = xi - (fxi / dfxi);
+        const fxi2 = f(xi2);
+        const dfxi2 = df(xi2);
+
         iteraciones++;
 
-        // Calcular EA de forma segura (evitar división por cero)
-        let error;
-        if (xr === 0) {
-            // si xi también fue 0, por convención ponemos 100%
-            error = (xi === 0) ? 100 : Math.abs(xr - xi) * 100;
-        } else {
-            error = Math.abs((xr - xi) / xr) * 100;
-        }
+        // calculo error relativo con protección contra división por cero
+        const denom = Math.abs(xi2) > 1e-12 ? xi2 : xi; // si xi2 == 0 usa xi
+        const error = (iteraciones === 1) ? 100 : Math.abs((xi2 - xi) / denom) * 100;
 
-        // Empujamos la fila DEL NUEVO punto xr (sin desfasar)
+        // ahora guardo la fila correspondiente a la nueva aproximación xi2
         valoresTabla.push({
-            xi: parseFloat(xr.toFixed(6)),
-            fxi: parseFloat(fxr.toFixed(6)),
-            dfxi: parseFloat(dfxr.toFixed(6)),
+            xi: parseFloat(xi2.toFixed(6)),
+            fxi: parseFloat(fxi2.toFixed(6)),
+            dfxi: parseFloat(dfxi2.toFixed(6)),
             ea: parseFloat(error.toFixed(6))
         });
 
-        // Criterio de paro (eamax en porcentaje)
+        // criterio de parada
         if (error < eamax) {
             return {
-                raiz: parseFloat(xr.toFixed(6)),
-                f_raiz: parseFloat(fxr.toFixed(6)),
+                raiz: parseFloat(xi2.toFixed(6)),
+                f_raiz: parseFloat(fxi2.toFixed(6)),
                 error: parseFloat(error.toFixed(6)),
-                iteraciones: iteraciones,
+                iteraciones: iteraciones + 1,
                 tabla: valoresTabla
             };
         }
 
-        if (iteraciones >= 100) {
-            return { mensaje: "No se encontro la raiz en 100 iteraciones.", tabla: valoresTabla };
-        }
+        // preparo la siguiente iteración
+        xi = xi2;
+        fxi = fxi2;
+        dfxi = dfxi2;
 
-        if (dfxr === 0) {
-            return { mensaje: "La derivada es cero en una iteracion.", tabla: valoresTabla };
+        if (dfxi === 0) {
+            return { mensaje: "La derivada es cero en una iteracion." };
         }
-
-        // Actualizar para la siguiente iteración
-        xi = xr;
-        fxi = fxr;
-        dfxi = dfxr;
     }
+
+    return { mensaje: "No se encontro la raiz en 100 iteraciones." };
 }
+
 
 
 export function secante(f, xi, xi1, eamax) {

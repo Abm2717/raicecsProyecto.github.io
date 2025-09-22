@@ -72,7 +72,7 @@ const opcionesMetodos = [
   { value: 'newtonRaphson', label: 'Método de Newton-Raphson' },
   { value: 'secante', label: 'Método de la Secante' }
 ]
-
+  
 // Computed para determinar qué inputs mostrar
 const esMetodoIntervalo = ref(false)
 const esNewtonRaphson = ref(false)
@@ -85,6 +85,9 @@ watch(metodoSeleccionado, (nuevoMetodo) => {
   esMetodoIntervalo.value = ['biseccion', 'reglaFalsa'].includes(nuevoMetodo)
   esNewtonRaphson.value = nuevoMetodo === 'newtonRaphson'
   esSecante.value = nuevoMetodo === 'secante'
+
+  resultados.value = null
+  comparacion.value = null
 })
 
 function bloquearTeclas(event) {
